@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Cloud Support Chatbot API
+  description: Hybrid AWS + Gemini AI Customer Support System
+  version: 1.0.0
+servers:
+  - url: https://9htr20gx65.execute-api.ap-southeast-1.amazonaws.com
+    description: AWS API Gateway Production
+
+paths:
+  /chat:
+    post:
+      summary: Send a support message
+      description: Returns a raw ticket response from the AWS backend.
+      operationId: chatPost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "payment failed"
+              required:
+                - message
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reply:
+                    type: string
+                    example: "Ticket created\nID TKT-1234 Solution: Check card"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Internal Server Error"

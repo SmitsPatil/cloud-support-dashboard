@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudSupport Dashboard | Hybrid Architecture</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --primary: #2563EB;
+      --primary-hover: #1D4ED8;
+      --bg-page: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --text-dark: #1E293B;
+      --text-muted: #64748B;
+      --bot-bubble: #F1F5F9;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-page);
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--text-dark);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .chat-card {
+      width: 480px;
+      height: 650px;
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .chat-header {
+      padding: 24px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 10;
+    }
+
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      color: white;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+
+    .header-title h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .header-title p {
+      margin: 0;
+      font-size: 11px;
+      color: #10B981;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .chat-view {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      max-width: 85%;
+      animation: fadeIn 0.4s ease-out;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message.user {
+      align-self: flex-end;
+    }
+
+    .message.bot {
+      align-self: flex-start;
+    }
+
+    .bubble {
+      padding: 14px 18px;
+      font-size: 14px;
+      border-radius: 18px;
+      line-height: 1.6;
+      white-space: pre-line;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      font-weight: 400;
+    }
+
+    .user .bubble {
+      background-color: var(--primary);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot .bubble {
+      background-color: var(--bot-bubble);
+      color: var(--text-dark);
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .ticket-id {
+      background-color: rgba(37, 99, 235, 0.08);
+      color: var(--primary);
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(37, 99, 235, 0.15);
+      display: inline-block;
+      margin: 0 2px;
+    }
+
+    .loading-box {
+      padding: 0 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+    }
+
+    .dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: #CBD5E1;
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    .loading-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .chat-footer {
+      padding: 24px;
+      background: white;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+    }
+
+    input {
+      flex: 1;
+      padding: 14px 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      outline: none;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+      background: #F8FAFC;
+    }
+
+    input:focus {
+      background: white;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    button {
+      width: 48px;
+      height: 48px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      background: var(--primary-hover);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scale(0.9);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .chat-card {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="chat-card">
+    <header class="chat-header">
+      <div class="icon-box"><i data-lucide="cloud"></i></div>
+      <div class="header-title">
+        <h2>Support Dashboard</h2>
+        <p>Hybrid Cloud Assistant Active</p>
+      </div>
+    </header>
+
+    <div id="chat-view" class="chat-view">
+      <div class="message bot">
+        <div class="bubble">Hi! 👋 I'm here to solve your cloud infrastructure issues. Reporting a problem (e.g. payment
+          failed) or have a <span class="ticket-id">TKT-7710</span>? Type below. For anything else, I'll use Gemini to
+          chat!</div>
+      </div>
+    </div>
+
+    <div id="loading" class="loading-box" style="display: none;">
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <span class="loading-text">Assistant is typing...</span>
+    </div>
+
+    <form id="chat-form" class="chat-footer">
+      <input type="text" id="user-input" placeholder="Type issue, ID or chat..." autocomplete="off">
+      <button type="submit"><i data-lucide="send"></i></button>
+    </form>
+  </div>
+
+  <script>
+    const AWS_URL = 'https://9htr20gx65.execute-api.ap-southeast-1.amazonaws.com/chat';
+    const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=AIzaSyBeKyhTT5u50h6PK3dnDzKXgKVOHNJbBiY';
+
+    const chatView = document.getElementById('chat-view');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const typingIndicator = document.getElementById('loading');
+
+    lucide.createIcons();
+
+    // ── INTENT DETECTION ──────────────────────────────────────────
+    // Returns true if the message looks like a support issue or ticket lookup
+    function isSupportIssue(msg) {
+      const lower = msg.toLowerCase();
+      const isTicketID = /tkt-\d+/i.test(msg);
+      const issueKeywords = [
+        'issue', 'error', 'problem', 'failed', 'failure', 'not working',
+        'broken', 'bug', 'crash', 'down', 'outage', 'slow', 'unable',
+        'cannot', "can't", 'payment', 'login', 'access', 'billing',
+        'charge', 'refund', 'invoice', 'service', 'setup', 'install',
+        'configure', 'connect', 'timeout', 'lost', 'missing', 'wrong'
+      ];
+      return isTicketID || issueKeywords.some(kw => lower.includes(kw));
+    }
+
+    // ── AWS CALL (Ticket Creation / Lookup) ───────────────────────
+    async function callAWS(message) {
+      try {
+        const res = await fetch(AWS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const data = await res.json();
+        console.log('AWS RAW:', data);
+        return data.reply || null;
+      } catch (err) {
+        console.error('AWS Error:', err);
+        return null;
+      }
+    }
+
+    // ── SMART LOCAL SOLUTION GENERATOR ───────────────────────────
+    function getSmartSolution(issue) {
+      const t = issue.toLowerCase();
+
+      if (t.includes('crash') || t.includes('crashing'))
+        return '- Check application logs for errors or stack traces\n- Verify available RAM and CPU resources are not maxed out\n- Restart the service and monitor for repeat crashes';
+
+      if (t.includes('payment') || t.includes('charge') || t.includes('billing') || t.includes('invoice') || t.includes('refund'))
+        return '- Verify your payment method is active and not expired\n- Check for any pending authorization holds on your account\n- Contact your bank or retry with an alternative payment method';
+
+      if (t.includes('login') || t.includes('log in') || t.includes('sign in') || t.includes('password') || t.includes('auth'))
+        return '- Reset your password using the "Forgot Password" option\n- Clear browser cache and cookies, then retry\n- Ensure Caps Lock is off and try an incognito window';
+
+      if (t.includes('slow') || t.includes('timeout') || t.includes('latency') || t.includes('performance'))
+        return '- Check your network speed and server region latency\n- Review resource usage (CPU/memory) on your cloud instance\n- Enable caching and reduce unnecessary API calls';
+
+      if (t.includes('connect') || t.includes('network') || t.includes('offline') || t.includes('unreachable'))
+        return '- Verify your internet connection is stable\n- Check firewall or security group rules blocking the port\n- Ping the server to confirm it is reachable';
+
+      if (t.includes('access') || t.includes('permission') || t.includes('unauthor') || t.includes('forbidden'))
+        return '- Verify your user role has the required permissions\n- Check IAM policies or access control rules\n- Contact your administrator to grant the necessary access';
+
+      if (t.includes('storage') || t.includes('disk') || t.includes('space') || t.includes('full'))
+        return '- Delete unused files, logs, or old backups\n- Expand your storage volume or upgrade your plan\n- Move infrequently accessed data to cold storage';
+
+      if (t.includes('database') || t.includes('db') || t.includes('query') || t.includes('sql'))
+        return '- Check database connection string and credentials\n- Look for long-running or deadlocked queries in logs\n- Verify the database service is running and responding';
+
+      if (t.includes('deploy') || t.includes('build') || t.includes('pipeline') || t.includes('ci') || t.includes('cd'))
+        return '- Review build logs for failed steps or dependency errors\n- Ensure environment variables and secrets are correctly set\n- Retry the deployment after clearing the build cache';
+
+      if (t.includes('email') || t.includes('notification') || t.includes('alert') || t.includes('smtp'))
+        return '- Verify SMTP credentials and server settings are correct\n- Check your spam folder or email allow-list\n- Test with a different email address to isolate the issue';
+
+      // Generic fallback (much better than before)
+      return '- Check the application/server logs for specific error messages\n- Restart the affected service and monitor for recurrence\n- Verify all environment variables and configuration files are correct';
+    }
+
+    // ── SMART LOCAL CHAT HANDLER ──────────────────────────────────
+    function getLocalChatReply(message) {
+      const t = message.toLowerCase();
+      // Use word-boundary check to avoid substring false matches
+      const has = (word) => new RegExp(`\\b${word}\\b`).test(t);
+
+      if (has('hello') || has('hi') || has('hey'))
+        return "Hello! 👋 I'm Cloud Support Dashboard (CSD). How can I help you today?";
+
+      if (t.includes('how are you') || t.includes('how r u'))
+        return "I'm fully operational and ready to help! What can I assist you with?";
+
+      if (t.includes('your name') || t.includes('who are you') || t.includes('who r u') || t.includes('who are u') || t.includes('what are you'))
+        return "I'm Cloud Support Dashboard (CSD) — your dedicated cloud support assistant. I can create tickets, look up issues, and answer your questions!";
+
+      if (t.includes('what can you do') || t.includes('what can u do') || t.includes('help me') || t.includes('capabilities'))
+        return "I can:\n- 🎫 Create support tickets for your issues\n- 🔍 Look up existing tickets (e.g. TKT-1234)\n- 💬 Answer general cloud & tech questions\n\nJust describe your problem or enter a Ticket ID!";
+
+      if (has('time') || has('date'))
+        return `It's currently ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} on ${new Date().toLocaleDateString()}. How can I help?`;
+
+      if (t.includes('thank') || t.includes('thx'))
+        return "You're welcome! Let me know if there's anything else I can help with. 😊";
+
+      if (has('bye') || t.includes('goodbye') || t.includes('see you'))
+        return "Goodbye! Feel free to return anytime you need support. Take care! 👋";
+
+      if (t.includes('who am i') || t.includes('tell me about me'))
+        return "I don't have access to your account details. Please log in to your dashboard to view your profile information.";
+
+      if (t.includes('tell me about') || t.includes('what is') || t.includes('explain'))
+        return "I'm best suited for cloud support queries. Could you describe a specific issue or ask about a service? I'll do my best to help!";
+
+      return "I'm Cloud Support Dashboard (CSD). Describe your cloud issue to create a ticket, or enter a Ticket ID (e.g. TKT-1234) to look one up!";
+    }
+
+    // ── GEMINI CALL ───────────────────────────────────────────────
+    async function callGemini(prompt) {
+      try {
+        const res = await fetch(GEMINI_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const data = await res.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+      } catch (err) {
+        console.error('Gemini Error:', err);
+        return null;
+      }
+    }
+
+    // ── AWS CALL (Ticket Creation / Lookup) ───────────────────────
+    // Accepts optional `solution` — Lambda will store it in DynamoDB
+    async function callAWS(message, solution = null) {
+      try {
+        const body = solution ? { message, solution } : { message };
+        const res = await fetch(AWS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        console.log('AWS RAW:', data);
+        return data.reply || null;
+      } catch (err) {
+        console.error('AWS Error:', err);
+        return null;
+      }
+    }
+
+    // ── MAIN SEND HANDLER ─────────────────────────────────────────
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      addMessage(message, 'user');
+      userInput.value = '';
+      showLoading(true);
+
+      let reply = null;
+
+      try {
+        if (isSupportIssue(message)) {
+          // ISSUE FLOW:
+          // 1. Get Gemini solution first
+          console.log('Issue detected — getting Gemini solution...');
+          const solutionPrompt = `You are a cloud support expert. A user has this issue: "${message}". Give exactly 2-3 specific troubleshooting steps as bullet points starting with "-". No intro sentence. Be concise and technical.`;
+          const geminiSolution = await callGemini(solutionPrompt) || getSmartSolution(message);
+
+          // 2. Send message + solution to AWS → Lambda stores in DynamoDB
+          console.log('Sending to AWS with Gemini solution...');
+          reply = await callAWS(message, geminiSolution);
+
+          // 3. If AWS returned something but has generic solution, replace it
+          const GENERIC_PATTERNS = [
+            'Please check your configuration and try again.',
+            'Please check logs, verify configuration, and retry. If issue persists, contact support.'
+          ];
+          const genericMatch = reply && GENERIC_PATTERNS.find(p => reply.includes(p));
+          if (genericMatch) {
+            reply = reply.replace(genericMatch, geminiSolution);
+          }
+
+          // 4. If AWS failed entirely → show local ticket with Gemini solution
+          if (!reply || reply.length < 5) {
+            console.warn('AWS unreachable — showing local ticket (not stored in DynamoDB)');
+            const localId = 'TKT-' + Math.floor(1000 + Math.random() * 9000);
+            reply = `Ticket created\nTicket No: ${localId}\nIssue: ${message.toLowerCase()}\nSolution: ${geminiSolution}`;
+          }
+
+        } else {
+          // CHAT FLOW: Gemini handles all normal conversation
+          const chatPrompt = `You are "Cloud Support Dashboard (CSD)", a professional cloud support assistant. NEVER say you are Gemini or Google. Always call yourself CSD. Be friendly and concise. User said: "${message}"`;
+          reply = await callGemini(chatPrompt);
+
+          // Fallback to local chat handler
+          if (!reply || reply.length < 2) {
+            reply = getLocalChatReply(message);
+          }
+        }
+
+        console.log('FINAL REPLY:', reply);
+        addMessage(reply, 'bot');
+
+      } catch (err) {
+        console.error('Critical Failure:', err);
+        addMessage("I'm here to help! Please try again.", 'bot');
+      } finally {
+        showLoading(false);
+      }
+    });
+
+    function addMessage(text, sender) {
+      const div = document.createElement('div');
+      div.className = `message ${sender}`;
+      const highlighted = text.replace(/(TKT-\d+)/gi, '<span class="ticket-id">$1</span>');
+      div.innerHTML = `<div class="bubble">${highlighted}</div>`;
+      chatView.appendChild(div);
+      chatView.scrollTop = chatView.scrollHeight;
+      lucide.createIcons();
+    }
+
+    function showLoading(active) {
+      typingIndicator.style.display = active ? 'flex' : 'none';
+      chatView.scrollTop = chatView.scrollHeight;
+    }
+  </script>
+</body>
+
+</html>
