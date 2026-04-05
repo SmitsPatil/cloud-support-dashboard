@@ -1,5 +1,7 @@
 # Cloud Support Dashboard (CSD) 🤖☁️
 
+> ⚠️ **This is a demo project** built for learning and demonstration purposes. Not intended for production use.
+
 A **Hybrid AI-Powered Cloud Support Chatbot** built with AWS + Google Gemini AI.
 
 ## 🚀 Live Demo
