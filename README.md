@@ -45,7 +45,7 @@ npm run dev
 ## 🌐 AWS API Endpoint
 
 ```
-POST https://9htr20gx65.execute-api.ap-southeast-1.amazonaws.com/chat
+POST https://YOUR_AWS_API_GATEWAY
 
 Body: { "message": "payment failed", "solution": "..." }
 ```
