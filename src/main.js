@@ -2,7 +2,7 @@ import './style.css';
 
 // API Configuration
 const AWS_ENDPOINT = 'https://9htr20gx65.execute-api.ap-southeast-1.amazonaws.com/chat';
-const GEMINI_API_KEY = 'AIzaSyD0m4LTJTmdQ5_A4G_CbMYQWTeBy8PS9pY';
+const GEMINI_API_KEY = 'GEMINI_API_KEY';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 // DOM Elements
